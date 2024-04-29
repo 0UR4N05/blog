@@ -1,0 +1,6 @@
+{
+	"name": "blog",
+	"engines": {
+    		"node": "18.x"
+	}
+}
