@@ -6,6 +6,7 @@ I'm giving you a leak; how can't you solve this? BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 
 Think you can handle a bad trip? Ever thought about taking a heroic dose?
 
+
 ```
     Arch:     amd64-64-little
     RELRO:    Full RELRO
@@ -14,15 +15,19 @@ Think you can handle a bad trip? Ever thought about taking a heroic dose?
     PIE:      PIE enabled
 ```
 
+
 ## Writeup
 These challenges were an absolute failure due to the lack of proper challenge engineering. I admit, I spent way too much time working on making the challenge exploitable while ignoring unintended solutions and not testing it thoroughly.
 
 Before diving into what went wrong, I'll highlight the intended solution. These two challenges are a sequel to `good_trip`. Now, we can't trick the program by giving it a zero to mprotect; the program protects the memory itself:
+
 ```c
     read(0, code, 0x999);
     mprotect(code, 0x1000, PROT_READ | PROT_EXEC);
 ```
+
 Additionally, PIE is enabled, and the only two addresses we know are `code` (our executable memory) and `edoc` (which serves as a fake stack). Before taking the player's input, the program sets a signal handler for SIGTRAP, which will come in handy later:
+
 ```c
     signal(SIGTRAP, debug);
 ```
