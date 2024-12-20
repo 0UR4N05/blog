@@ -1,11 +1,10 @@
-from flask import Flask, render_template
-from src.getfiles import return_files
 from src.init import app
+from flask import render_template
+from src.serve import *
 
 @app.route("/")
 def main():
-    dirs = return_files()
-    return (render_template('index.html', dirs=dirs))
+    return (render_template('index.html'))
 
-if (__name__ == "__main__"):
-    app.run()
+if __name__ == "__main__":
+    app.run(debug=True)

@@ -1,40 +1,16 @@
-{% extends 'template.html' %}
-
-{% block content %}
-	<div class="index">
-		<h2 class="links">
-			<a = href="#links">
-				<code id="_hash" class="inline-code">#</code>
-				"links"
-			</a>
-		</h2>
-		<ul class="linkslist">
-			<li>
-				<a href="https://github.com/0ur4n05/blog">source</a>
-			</li>
-		</ul>
-<div class="ntfy-box">
-  <h4>send a notification directly to my phone. please be funny.</h4>
-  <textarea id="ntfy-input" placeholder="lol"></textarea
->
-  <button onclick="javascript:sendNotification()" style="margin-lef
-t:10px;">Send</button>
-</div>
-
-<script>
-// stolen code from https://lilysthings.org/
-function send(message) {
-    let r = new XMLHttpRequest()
-    r.open("POST", "https://ntfy.sh/lmongol", true)
-    r.setRequestHeader("Content-Type", "text/plain")
-    r.send(message)
-  }
-  let ntfyInput = document.getElementById("ntfy-input")
-  function sendNotification() {
-    if (ntfyInput.value.length <= 0) return
-    send(ntfyInput.value)
-    ntfyInput.value = ""
-  }
-</script>
-	</div>
-{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>lmngol</title>
+    <link rel="stylesheet" href="static/css/main.css">
+</head>
+<body>
+    <div class="container">
+        <div class="file-tree" id="fileTree"></div>
+        <div class="file-content" id="fileContent"></div>
+    </div>
+    <script src="static/js/main.js"></script>
+</body>
+</html>
