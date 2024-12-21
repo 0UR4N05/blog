@@ -71,6 +71,9 @@ async function renderFileTree(container, path = '/') {
 		button.className =  item.type === 'dir' ? 'folder-icon' : 'file-icon'
 		button.textContent = item.filename;
 		const itemPath = fileExplorer.resolvePath(`${path}${item.filename}`);
+		if (item.filename == "README.md"){
+		    fileExplorer.renderFile(itemPath);
+		}
 		if (item.type === "file"){
 		    button.onclick = async () => {
 			const itemData = await fileExplorer.fetchDirectory(itemPath);
