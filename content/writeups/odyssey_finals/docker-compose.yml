@@ -1,0 +1,24 @@
+version: "3.8"
+
+services:
+  amirmir:
+    privileged: true
+    restart : always
+    build : ./amirmir
+    read_only: true
+    ports : 
+      - "9191:9191"
+  not_so_average_todo_app: 
+    privileged: true
+    restart : always
+    build : ./not_so_average_todo_app
+    read_only: true
+    ports : 
+      - "8181:8181"
+  jantofix_mailserv: 
+    privileged: true
+    restart : always
+    build : ./jantofix_mailserv
+    read_only: true
+    ports : 
+      - "7171:7171"
