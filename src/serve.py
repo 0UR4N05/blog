@@ -1,12 +1,21 @@
 from src.init import app
-from flask import request
+from flask import request, send_from_directory
 from os import getcwd, path, listdir
 from src.render import render_markdown, render_code
 import json
-import chardet
+
+def isbin(filename):
+    f = open(filename, "rb")
+    con = f.read(10)
+    f.close()
+    for i in con:
+        if (i > 126):
+            return (True)
+    return (False)
 
 def process_file(lfile):
-    codes = ["lua", "py", "c", "cxx", "cpp", "rs", "js", "log", "sh", "s", "json", "yml"]
+    codes = ["lua", "py", "c", "cxx", "cpp", "rs", "js", "log", "sh", "s", "json", "yml", "h", "hpp",
+             "hxx"]
     ext = lfile.split(".")[-1]
     content = None
 
@@ -15,21 +24,28 @@ def process_file(lfile):
     elif (ext in codes):
         content = render_code(lfile)
     else:
-        with open(lfile, 'rb') as file:
-            raw_data = file.read()
-            result = chardet.detect(raw_data)
-            if (result["encoding"] == "ascii"):
-                return (raw_data)
-            return (None)
+        if (isbin(lfile) == False):
+            with open(lfile, 'r') as file:
+                data = file.read().replace("\n", "<br>")
+                return (data)
+        return ("Binary File")
     return (content)
 
 def process_dir(ldir):
     files = []
     for file in listdir(ldir):
+        if (file[0] == '.'):
+            continue
         if (path.isdir(ldir + file)):
-            files.append(file + "/")
+            files.append({
+                "filename" : file + "/",
+                "type" : "dir"
+                })
         else :
-            files.append(file)
+            files.append({
+                "filename" : file,
+                "type" : "file"
+                })
     return files
 
 def process(upath):
@@ -51,12 +67,8 @@ def process(upath):
 @app.route("/ls")
 def ls():
     path = getcwd() + "/content" + request.args.get("path")
-    response = process(path)
-    if (response["contents"] == None):
-        response["type"] = "link"
-        response["contents"] = "/content" + request.args.get("path")
-    return (json.dumps(response))
+    return (json.dumps(process(path)))
 
 @app.route('/content/<path:filename>')
-def serve_from_directory(filename):
-    return send_from_directory('content', filename)
+def serve_file(filename):
+    return send_from_directory('../content', filename)
