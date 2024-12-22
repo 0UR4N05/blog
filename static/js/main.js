@@ -64,6 +64,11 @@ async function renderFileTree(container, path = '/') {
 	container.innerHTML = '';
 	const data = await fileExplorer.fetchDirectory(path);
 	const filepath = document.getElementById('file-path-txt');
+	const downloadButton = document.getElementById('download-button');
+	const downloadLink = document.createElement('a');
+	downloadButton.addEventListener('click', function() {
+	    downloadLink.click();
+	});
 	filepath.textContent = path;
 	if (data.type === 'directory') {
 	    for (const item of data.contents) {
@@ -78,13 +83,8 @@ async function renderFileTree(container, path = '/') {
 		    button.onclick = async () => {
 			const itemData = await fileExplorer.fetchDirectory(itemPath);
 			fileExplorer.renderFile(itemPath);
-			const downloadButton = document.getElementById('download-button');
-			const downloadLink = document.createElement('a');
 			downloadLink.href = `content${path}${item.filename}`;
 			downloadLink.download = `${item.filename}`;
-			downloadButton.addEventListener('click', function() {
-			    downloadLink.click();
-			});
 			document.getElementById('copy-button').addEventListener('click', function() {
 			    const url = `content${path}${item.filename}`;
 			    console.log(url)
