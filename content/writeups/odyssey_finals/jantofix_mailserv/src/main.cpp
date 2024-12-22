@@ -65,7 +65,7 @@ std::vector<std::string> split_cmd(std::string cmd, char delim){
 }
 
 void create_user(std::vector<std::string> splcmd){
-	// syntax LOGG <fname> <lname> <password> <email_handle>
+	// syntax AUTH <fname> <lname> <password> <email_handle>
 	if (splcmd.size() != 5){
 		throw srv_exception("555 Bad syntax");
 		return ;
