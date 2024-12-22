@@ -68,7 +68,3 @@ def process(upath):
 def ls():
     path = getcwd() + "/content" + request.args.get("path")
     return (json.dumps(process(path)))
-
-@app.route('/content/<path:filename>')
-def serve_file(filename):
-    return send_from_directory('../content', filename)

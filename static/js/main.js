@@ -7,7 +7,7 @@ function updateCursorPosition() {
 }
 async function fetchAndCopyContent(url) {
     try {
-	const response = await fetch(url);
+	const response = await fetch(`${window.location.protocol}//${window.location.host}/${url}`);
 	if (!response.ok) {
 	    throw new Error('Network response was not ok');
 	}
@@ -60,36 +60,43 @@ const fileExplorer = {
     }
 };
 
-async function renderFileTree(container, path = '/') {
-	container.innerHTML = '';
-	const data = await fileExplorer.fetchDirectory(path);
-	const filepath = document.getElementById('file-path-txt');
+function setDownloadLink(dir, filename){
 	const downloadButton = document.getElementById('download-button');
 	const downloadLink = document.createElement('a');
 	downloadButton.addEventListener('click', function() {
 	    downloadLink.click();
 	});
-	filepath.textContent = path;
+	downloadLink.href = `${window.location.protocol}//${window.location.host}/${dir}`;
+	downloadLink.download = filename;
+}
+
+async function renderFileTree(container, path = '/') {
+	container.innerHTML = '';
+	const data = await fileExplorer.fetchDirectory(path);
+	const filepath = document.getElementById('file-path-txt');
+	const cdirpath = fileExplorer.resolvePath(`${window.location.pathname}`);
+	const cdir = await fileExplorer.fetchDirectory(cdirpath);
+
 	if (data.type === 'directory') {
 	    for (const item of data.contents) {
 		const button = document.createElement('button');
 		button.className =  item.type === 'dir' ? 'folder-icon' : 'file-icon'
 		button.textContent = item.filename;
 		const itemPath = fileExplorer.resolvePath(`${path}${item.filename}`);
-		if (item.filename == "README.md"){
-		    fileExplorer.renderFile(itemPath);
+		if (item.filename == "README.md" && cdir.type === "directory"){
+		    await fileExplorer.renderFile(itemPath);
 		}
 		if (item.type === "file"){
 		    button.onclick = async () => {
-			const itemData = await fileExplorer.fetchDirectory(itemPath);
-			fileExplorer.renderFile(itemPath);
-			downloadLink.href = `content${path}${item.filename}`;
-			downloadLink.download = `${item.filename}`;
 			document.getElementById('copy-button').addEventListener('click', function() {
 			    const url = `content${path}${item.filename}`;
-			    console.log(url)
 			    fetchAndCopyContent(url);
 			});
+			const itemData = await fileExplorer.fetchDirectory(itemPath);
+			fileExplorer.renderFile(itemPath);
+			setDownloadLink(`content${path}${item.filename}`, item.filename);
+			filepath.textContent = `${path}${item.filename}`;
+			history.pushState({}, "", `${path}${item.filename}`)
 		    }
 		} else if (item.type === "dir") {
 		    button.onclick = async () => {
@@ -103,6 +110,8 @@ async function renderFileTree(container, path = '/') {
 			    await renderFileTree(newChildrenDiv, itemPath);
 			    button.parentNode.insertBefore(newChildrenDiv, button.nextSibling);
 			}
+			filepath.textContent = itemPath;
+			history.pushState({}, "", itemPath)
 		    }
 		}
 		container.appendChild(button);
@@ -114,7 +123,30 @@ async function renderFileTree(container, path = '/') {
     }
 }
 
-renderFileTree(document.getElementById('fileTree'));
+async function main() {
+    if (window.location.pathname != "/"){
+	const itemPath = fileExplorer.resolvePath(`${window.location.pathname}`);
+	const filepath = document.getElementById('file-path-txt');
+	filepath.textContent = `${window.location.pathname}`;
+	const data = await fileExplorer.fetchDirectory(itemPath);
+	console.log(data)
+	if (data.type  === 'directory'){
+	    renderFileTree(document.getElementById('fileTree'), window.location.pathname);
+	} else {
+	    await fileExplorer.renderFile(itemPath);
+	    renderFileTree(document.getElementById('fileTree'));
+	    setDownloadLink(`content${itemPath}`, data.filename);
+	    document.getElementById('copy-button').addEventListener('click', function() {
+		const url = `content${itemPath}`;
+		fetchAndCopyContent(url);
+	    });
+	}
+    } else {
+	renderFileTree(document.getElementById('fileTree'));
+    }
+}
+
+main()
 updateCursorPosition();
 window.addEventListener('resize', updateCursorPosition);
 setInterval(updateCursorPosition, 50);
